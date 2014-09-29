@@ -52,14 +52,10 @@ class GMMEstimator(object):
         for gaussind in range(self.gaussians):
             for datap in range(len(data)):
                 gammas[gaussind][datap] = self._posteriorocc(data[datap], weights, mues, sigmas, gaussind)
-#                 t = process.Process(target=self._async_posteriorocc,args=(data[datap], weights, mues, sigmas, gaussind, gammas, datap))
-#                 t.start()
-#                 gammas[gaussind][datap] = self.threadpool.get()
         return gammas
     
     
     def _async_posteriorocc(self, datapoint, weights, mues, sigmas, gaussind,gammas, dataind):
-#         gammas[gaussind][dataind] = 
         self.threadpool.put(self._posteriorocc(datapoint, weights, mues, sigmas, gaussind))
         
     def _auxf(self, gammas, weights, data, mues, sigmas):
@@ -95,7 +91,6 @@ class GMMEstimator(object):
         mues = np.random.sample((self.gaussians, self.dim))
 #         We use qr decomposition to get a matrix q, which is orthogonal and invertible, so
         qrinps = np.random.sample((self.gaussians, self.dim, self.dim))
-# qs is a helping variable to store the q from the qr decomposition
         qs = []
         
         for qrinp in qrinps:
@@ -155,7 +150,6 @@ class Updater(object):
     @abc.abstractmethod
     def update(self,gammas, weights, data, mues, sigmas):
         raise NotImplementedError("Implement this class")
-        pass
     
 class MAPUpdater(Updater):
     
