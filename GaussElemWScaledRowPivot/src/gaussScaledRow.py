@@ -56,11 +56,9 @@ def scaledPivot(mat):
 #         Swap the current iteration index with the maxval
         p[k], p[maxcolind] = p[maxcolind], p[k]
 #         I use p to iterate because otherwise a swap would be necessary for the p[i] p[j] rows
-        print "maxcol ",maxcolval
         for i in range(k + 1, len(p)):
             z = Fraction(mat[p[i]][k] / mat[p[k]][k]).limit_denominator()
             mat[p[i]][k] = z
-            print mat[p[i]][k] , mat[p[k]][k]
             for j in range(k + 1, len(p)):
                 mat[p[i]][j] = Fraction(mat[p[i]][j] - (z * mat[p[k]][j])).limit_denominator()
         print "Current Permutation mat : %s"%(p)
