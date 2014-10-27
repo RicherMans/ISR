@@ -11,11 +11,10 @@ class GMMEstimator(object):
     '''
     classdocs
     '''
-    gaussians = 0
-    iterations = 100
-    threshold = 0.001
+    iterations = 1000
+    threshold = 0.00001
     
-    def __init__(self, gaussians, threshold=0.001):
+    def __init__(self, gaussians):
         '''
         Constructor
         '''
@@ -93,17 +92,20 @@ class GMMEstimator(object):
         
 #         Dimensionality of data vectors are needed here
         self.dim = len(data[0])
-        
-        mues = np.random.sample((len(self.gaussians), self.dim))
-#         mues = np.zeros(shape=(len(self.gaussians),self.dim))
+        datamean=np.mean([i.data for i in data])
+        datavar =np.var([i.data for i in data])
+#         mues = np.random.sample((len(self.gaussians), self.dim))
+        mues = np.empty(shape=(len(self.gaussians),self.dim))
+        mues.fill(datamean)
 #         We use qr decomposition to get a matrix q, which is orthogonal and invertible, so
-        qrinps = np.random.sample((len(self.gaussians), self.dim, self.dim))
-#         qrinps = np.random.beta(1,1,size=(len(self.gaussians), self.dim, self.dim))
+        initsigma = np.empty((len(self.gaussians), self.dim, self.dim))
+        initsigma.fill(datavar)
+#         initsigma = np.ones(shape=(len(self.gaussians), self.dim, self.dim))
         
         
         qs = []
         
-        for qrinp in qrinps:
+        for qrinp in initsigma:
             qs.append(np.diag(np.diag(qrinp)))
         sigmas = np.array(qs)
 #         Initialize the weights uniformly and then apply the probability constraint
@@ -122,14 +124,16 @@ class GMMEstimator(object):
             if math.isnan(objfimp_new - objfimp_old):
                 break
             gammas = self._estep(data, weights, mues, sigmas)
-            objfimp_old = self._auxf(gammas, weights, data, mues, sigmas)
+#             objfimp_old = self._auxf(gammas, weights, data, mues, sigmas)
+            objfimp_old = objfimp_new
             updater.update(gammas, weights, data, mues, sigmas)
             objfimp_new = self._auxf(gammas, weights, data, mues, sigmas)
-            print "Iteration %i done \n Obj Improvement is : %.5f" % (iter + 1, np.abs(objfimp_new - objfimp_old))
+            print "Iteration %i done \n Obj Improvement is : %.5f \n LLK %.5f" % (iter + 1, np.abs(objfimp_new - objfimp_old),objfimp_new)
         self._mues = mues
         self._sigmas = sigmas
         self._weights = weights
         self._gammas = gammas
+        print "EM Finished after %i iterations \n Final mue %s \n Final Sig %s "%(iter+1,mues,sigmas)
         return self
         
         
