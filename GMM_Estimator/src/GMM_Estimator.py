@@ -6,7 +6,6 @@ Created on Sep 15, 2014
 import numpy as np
 import math
 import abc
-from multiprocessing import process,Queue
 
 class GMMEstimator(object):
     '''
@@ -21,7 +20,6 @@ class GMMEstimator(object):
         Constructor
         '''
         self.gaussians = gaussians
-        self.threadpool = Queue()
         
     def _multipdf(self, x, mue, sigma):
         if self.dim == len(mue) and (self.dim, self.dim) == sigma.shape:
@@ -41,23 +39,26 @@ class GMMEstimator(object):
 #         Use tis in e step so that dont need to rewrte it for the prodictor
         nom = weights[gaussind] * self._multipdf(datapoint, mues[gaussind], sigmas[gaussind])
         denom = 0
-        for gauss in range(self.gaussians):
+#         for gauss in range(self.gaussians):
+#             datapoint.label
+#             denom += weights[datapoint.label] * self._multipdf(datapoint, mues[gauss], sigmas[gauss])
+        for gauss in self.gaussians:
             denom += weights[gauss] * self._multipdf(datapoint, mues[gauss], sigmas[gauss])
         return float(nom /denom)
     
     
     def _estep(self, data, weights, mues, sigmas):
         '''E-Step, which calculates the posterior occupancy for each datapoint in data '''  
-        gammas = np.zeros((self.gaussians,len(data)))
-        for gaussind in range(self.gaussians):
-            for datap in range(len(data)):
-                gammas[gaussind][datap] = self._posteriorocc(data[datap], weights, mues, sigmas, gaussind)
+        gammas = np.zeros((len(self.gaussians),len(data)))
+#         for gaussind in range(self.gaussians):
+#             for datap in range(len(data)):
+#                 gammas[gaussind][datap] = self._posteriorocc(data[datap], weights, mues, sigmas, gaussind)
+        for datap in range(len(data)):
+            gaussind=data[datap].label
+            gammas[gaussind][datap] = self._posteriorocc(data[datap].data, weights, mues, sigmas, gaussind)
         return gammas
     
     
-    def _async_posteriorocc(self, datapoint, weights, mues, sigmas, gaussind,gammas, dataind):
-        self.threadpool.put(self._posteriorocc(datapoint, weights, mues, sigmas, gaussind))
-        
     def _auxf(self, gammas, weights, data, mues, sigmas):
         '''
         Calculates the auxilliary function
@@ -71,9 +72,14 @@ class GMMEstimator(object):
         occ_log_weight = 0
         logdet_norm = 0                
         for datap in range(len(data)):
-            for gauss in range(self.gaussians):
+#             for gauss in range(self.gaussians):
+#                 occ_log_weight += gammas[gauss][datap] * np.log(weights[gauss])
+#                 x_mue = np.array(data[datap] - mues[gauss])
+#                 sigma_inv = np.linalg.inv(sigmas[gauss])
+#                 logdet_norm += gammas[gauss][datap] * (np.log(np.linalg.det(sigmas[gauss])) + np.dot(np.dot(x_mue.T, sigma_inv), x_mue))
+                gauss = data[datap].label
                 occ_log_weight += gammas[gauss][datap] * np.log(weights[gauss])
-                x_mue = np.array(data[datap] - mues[gauss])
+                x_mue = np.array(data[datap].data - mues[gauss])
                 sigma_inv = np.linalg.inv(sigmas[gauss])
                 logdet_norm += gammas[gauss][datap] * (np.log(np.linalg.det(sigmas[gauss])) + np.dot(np.dot(x_mue.T, sigma_inv), x_mue))
         return occ_log_weight - 0.5 * logdet_norm
@@ -88,21 +94,25 @@ class GMMEstimator(object):
 #         Dimensionality of data vectors are needed here
         self.dim = len(data[0])
         
-        mues = np.random.sample((self.gaussians, self.dim))
+        mues = np.random.sample((len(self.gaussians), self.dim))
+#         mues = np.zeros(shape=(len(self.gaussians),self.dim))
 #         We use qr decomposition to get a matrix q, which is orthogonal and invertible, so
-        qrinps = np.random.sample((self.gaussians, self.dim, self.dim))
+        qrinps = np.random.sample((len(self.gaussians), self.dim, self.dim))
+#         qrinps = np.random.beta(1,1,size=(len(self.gaussians), self.dim, self.dim))
+        
+        
         qs = []
         
         for qrinp in qrinps:
             qs.append(np.diag(np.diag(qrinp)))
         sigmas = np.array(qs)
 #         Initialize the weights uniformly and then apply the probability constraint
-        weights = np.ones(self.gaussians)
+        weights = np.ones(len(self.gaussians))
         sumweights=sum(weights)
         for i in range(len(weights)):
             weights[i] = weights[i] /sumweights
         objfimp_old = 0
-        objfimp_new = -100
+        objfimp_new = -10
         
         updater=MLEUpdater(self.gaussians)
         
@@ -132,8 +142,8 @@ class GMMEstimator(object):
             tmpmax = 0
             maxi = -10
             maxgauss=-1
-            for gauss in range(self.gaussians):
-                tmpmax = float(self._posteriorocc(data[datap], self._weights, self._mues, self._sigmas, gauss))
+            for gauss in self.gaussians:
+                tmpmax = float(self._posteriorocc(data[datap].data, self._weights, self._mues, self._sigmas, gauss))
                 if tmpmax > maxi:
                     maxi = tmpmax
                     maxgauss = gauss
@@ -204,24 +214,24 @@ class MLEUpdater(Updater):
             sigmas has dims [ gauss featuresize featuresize ]
         '''
         gammaclasssum = []
-        for gauss in range(self.gaussians):
+        for gauss in self.gaussians:
             mue_tmp = 0
             tmpgammaclassum = 0
             for datap in range(len(data)):
-                mue_tmp += gammas[gauss][datap] * data[datap]
+                mue_tmp += gammas[gauss][datap] * data[datap].data
                 tmpgammaclassum += gammas[gauss][datap]
             gammaclasssum.append(tmpgammaclassum)
             mues[gauss] = np.array(mue_tmp/tmpgammaclassum)
         
-        for gauss in range(self.gaussians):
+        for gauss in self.gaussians:
             sigma_tmp = 0
             for datap in range(len(data)):
-                x_mue = np.matrix(data[datap] - mues[gauss])
+                x_mue = np.matrix(data[datap].data - mues[gauss])
                 sigma_tmp += gammas[gauss][datap] * np.dot(x_mue.T, x_mue)
                 sigma_tmp = np.diag(np.diag(sigma_tmp))
             sigmas[gauss] = 1. / gammaclasssum[gauss] * sigma_tmp
         
         sumclasses = sum(gammaclasssum)
-        for gauss in range(self.gaussians):
+        for gauss in self.gaussians:
             weights[gauss] = gammaclasssum[gauss] / sumclasses
     
