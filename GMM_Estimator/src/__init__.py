@@ -15,7 +15,7 @@ def main():
     if args.train:
         trainfile=args.train.readlines()
         trainfile = separateTrain(trainfile)
-    
+        
     estimator = GMMEstimator([0,1])
     estimator.fit(trainfile)
     
@@ -25,8 +25,10 @@ def main():
         predictions = estimator.predict(testfile)
         if args.o:
             with open(args.o,'w') as op:
+                print "Writing out file %s"%(args.o)
                 for prediction in zip(testfile, predictions):
-                    op.write(str(prediction[0].data) + ' ' +str(prediction[1])+'\n')
+                    op.write( str(prediction[0].data[0]) + ' ' + str(prediction[0].data[1]) + ' ' +str(prediction[1])+'\n')
+                print "Writeout done, finished!"
          
 def parseargs():
     parser= argparse.ArgumentParser()

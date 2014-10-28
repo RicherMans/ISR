@@ -11,7 +11,7 @@ class GMMEstimator(object):
     '''
     classdocs
     '''
-    iterations = 1000
+    iterations = 100
     threshold = 0.00001
     
     def __init__(self, gaussians):
