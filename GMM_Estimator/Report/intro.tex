@@ -108,9 +108,18 @@ w_c &= \frac{\gamma_c}{\sum\limits_c^C \gamma_c} \\
 After the parameters are updated in the M-Step, the new parameters (denoted by $\hat{a} $) will be re-estimated using the E-step.
 
 \section{Improving the performance}
-In our experiments it can be seen that the initialization of mean and variance plays a huge role how if the EM will find a proper minima or not. We used random initialization in the interval of $ [0,1]$ for mean and variance, which lead both to huge differences. It could be observed, that depending on the values, EM converges towards 3-5 different minima, in different experiments respectively.
-In the end we fixed out initialization on using the mean and variance of the data and adding some Gaussian noise to it. This procedure is stable, as in our experiments no thing did converge towards different minima.
+In our experiments it can be seen that the initialization of mean and variance plays a huge role how if the EM will find a proper minima or not. We used random initialization in the interval of $ [0,1]$ for mean and variance, which lead both to huge differences. 
+In the end we fixed out initialization on using the mean and variance of the data and adding some Gaussian noise to it. This procedure is stable, as in our experiments the convergence is guaranteed.
+Although there is a problem when using too many classes within a GMM. One of the most troublesome is the singularity of the covariance matrix. It can happen that due to too many classes the values within the covariance matrix are too close to zero, which would lead to a zero determinant. To avoid this problem one could use flooring, so that values lower than a flooring constant $f$, will be replaced by that flooring constant.
 
+\section{Used GMM}
+The implemented GMM works as follows:
+\begin{enumerate}
+\item Train a GMM with $n$ components for each classlabel
+\item Test GMM against the given test data
+\end{enumerate}
+We initialized the GMM by using the data means. 
+At the end, we used 2, 5,6,10 classes respectively. The results can be seen in 10class.txt, 2class.txt, 5class.txt and 6class.txt.
 
 \section{Other approaches}
 One could easily use a more sophisticated method to initialize the EM. For example k-means or k-NN are the favourite ones, yet we did not attack these algorithms, since their runtime influences the runtime of our program heavily. Moreover one could use a MAP based approach during the update phase of the training to achieve a greater stability.

@@ -6,7 +6,6 @@ Created on Sep 15, 2014
 import numpy as np
 import math
 import abc
-from multiprocessing import process,Queue
 
 class GMMEstimator(object):
     '''
@@ -14,7 +13,7 @@ class GMMEstimator(object):
     '''
     gaussians = 0
     iterations = 100
-    threshold = 0.001
+    threshold = 0.01
     
     def __init__(self,label, gaussians, threshold=0.001):
         '''
@@ -22,7 +21,7 @@ class GMMEstimator(object):
         '''
         self.gaussians = gaussians
         self.label = label
-        
+         
     def _multipdf(self, x, mue, sigma):
         if self.dim == len(mue) and (self.dim, self.dim) == sigma.shape:
             det = np.linalg.det(sigma)
