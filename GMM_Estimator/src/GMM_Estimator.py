@@ -16,12 +16,12 @@ class GMMEstimator(object):
     iterations = 100
     threshold = 0.001
     
-    def __init__(self, gaussians, threshold=0.001):
+    def __init__(self,label, gaussians, threshold=0.001):
         '''
         Constructor
         '''
         self.gaussians = gaussians
-        self.threadpool = Queue()
+        self.label = label
         
     def _multipdf(self, x, mue, sigma):
         if self.dim == len(mue) and (self.dim, self.dim) == sigma.shape:
@@ -115,11 +115,12 @@ class GMMEstimator(object):
             objfimp_old = self._auxf(gammas, weights, data, mues, sigmas)
             updater.update(gammas, weights, data, mues, sigmas)
             objfimp_new = self._auxf(gammas, weights, data, mues, sigmas)
-            print "Iteration %i done \n Obj Improvement is : %.5f" % (iter + 1, np.abs(objfimp_new - objfimp_old))
+            print "Iteration %i done \n Obj Improvement is : %.5f , LLK : %.5f" % (iter + 1, np.abs(objfimp_new - objfimp_old),objfimp_new)
         self._mues = mues
         self._sigmas = sigmas
         self._weights = weights
         self._gammas = gammas
+        print "Training of GMM %s finished!"%(self.label)
         return self
         
         
@@ -131,13 +132,11 @@ class GMMEstimator(object):
 #             Calculate prosterior occupancy and take the maxi value
             tmpmax = 0
             maxi = -10
-            maxgauss=-1
             for gauss in range(self.gaussians):
                 tmpmax = float(self._posteriorocc(data[datap], self._weights, self._mues, self._sigmas, gauss))
                 if tmpmax > maxi:
                     maxi = tmpmax
-                    maxgauss = gauss
-            ret.append(maxgauss)
+            ret.append((maxi,data[datap],self.label))
         return ret
     
 class Updater(object):
