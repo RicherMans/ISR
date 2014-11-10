@@ -142,11 +142,11 @@ def lda(datapoints,threshold = 0.01):
     s_w = np.zeros((m,n))
     for i in range(cl):
         curmat = datapoints[i]
-        for r in range(n):
-#             Get the current row
-            row = curmat[:,r].reshape(n,1)
-            meanrow = mean_vectors[i].reshape(n,1)
-            s_w += (row-meanrow).dot((row-meanrow).T)
+        for row in curmat:
+#             Get the current col
+            col = row.reshape(n,1)
+            meancol = mean_vectors[i].reshape(n,1)
+            s_w += (col-meancol).dot((col-meancol).T)
 #         print ('Within class covaricance Scatter : ',s_w[i])
     overall_mean = np.mean(mean_vectors, axis=0)
     s_b = np.zeros((m,n))
@@ -167,7 +167,10 @@ def lda(datapoints,threshold = 0.01):
             break
     w= np.hstack(eig_pairs[i][1].reshape(n,1) for i in range(maxindexTopVals))
     
-    x_lda = w.T.dot(datapoints.reshape(1,cl*n*m).T).T
+    print w.T.shape
+    print datapoints.shape
+    print datapoints.reshape(cl*n,m).shape
+    x_lda = w.T.dot(datapoints.reshape(1,cl*n,m)).T
     print x_lda.shape
 def eigdecomposition(mat):
     row, col = mat.shape
