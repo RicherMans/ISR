@@ -1,61 +1,39 @@
-"""File            cheney-householder.py
-Author        Ernesto P. Adorio, Ph.D.
-                  University of the Philippines Extenstion Program at Clark Field
-                  Pampanga, the Philippines
-Revisions    2009.01.20 first version
-References
-        Kincaid and Cheney, "Numerical Analysis",  2nd Ed. pp. 299-303
-        Brooks Coole Publishing
-"""
- 
 from math import sqrt
 import numpy as np
  
-def cheneyhouseholder(mat):
-    # Given mat, determines a factorization Q mat = R or mat = Q'R.
+def gram_schmidt(mat):
+    # Given mat, determines a factorization q mat = r or mat = q'r.
     # Remove the verbose print lines if used in a library.
     nrows, ncols = mat.shape
-    Q = np.zeros(shape=(nrows, nrows))
-    R = np.zeros(shape=(nrows, ncols))
-    for j in range(nrows - 1):
+    a = np.copy(mat)
+    q = np.zeros(shape=(nrows, nrows),dtype=np.float)
+    r = np.zeros(shape=(nrows, ncols),dtype=np.float)
+    for k in range(nrows):
         # compute the column E^2 norm
-        x = mat[:,j] # jth column vector.
-        beta = -sqrt(sum(x * x for x in x))
-        print "x = ", x
-        print "beta=", beta
- 
-        
-#         Ui = imvv
-#         Ui = matprependidentity(Ui, j)
-#         print "resolving Ui:"
-#         print "U_", j , "= ",
-#         for u in Ui: print u 
-#   
-#         UiA = matprod(Ui, mat)
-#         print "U_", j, "mat:"
-#         matprint(UiA)
-#         mat = UiA
-#         if j == 0:
-#             Q = Ui
-#         else:
-#             Q = matmul(Ui, Q)
-#         print "Q:"
-#         matprint(Q)
-#         R = UiA
-    return Q, R
- 
- 
-if __name__ == "__main__":
-     A = [[12, -51, 4],  # Wikipedia
-         [6, 167, -68],
-         [-4, 24, -41]]
-     A = [[63, 41, -88],  # Cheney
-         [42, 60, 51],
-        [0, -28, 56],
-        [126, 82, -71]]
-     print "A : %s"%(A) 
-     Q, R = cheneyhouseholder(np.array(A))
-     print "R:"
-#      matprint(R)
-     print("QR:")
-#      matprint(matmul(Q, A))
+        x = a[:, k]  # jth column vector.
+        r[k,k] = sqrt(sum(x * x for x in x))
+        for j in range(ncols):
+            q[j,k]= a[j,k]/r[k,k]
+        for i in range(k+1,nrows):
+            s=0
+            for j in range(ncols):
+                s+= a[j,i] * q[j,k]
+            r[k,i] = s
+            for j in range(ncols):
+                a[j,i] = a[j,i]-r[k,i]*q[j,k]
+    return q, r
+
+
+def eigdecomposition(mat):
+    row,col = mat.shape
+    eigenvalues=np.zeros(row)
+#     print np.linalg.eigvals(mat)
+    for m in reversed(range(1,row)):
+        for _ in range(10):
+#             q,r = np.linalg.qr(mat - mat[m,m]*np.eye(row) )
+            q,r = gram_schmidt(mat - mat[m,m]*np.eye(row))
+            mat = np.dot(r,q)+mat[m,m]*np.eye(row)
+        eigenvalues[m] = mat[m,m]
+    eigenvalues[0]= mat[0,0]
+    print eigenvalues
+
