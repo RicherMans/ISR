@@ -1,6 +1,8 @@
 import argparse
-import numpy as np
 from fractions import Fraction
+
+import numpy as np
+
 
 def main():
     args = parseArgs()
