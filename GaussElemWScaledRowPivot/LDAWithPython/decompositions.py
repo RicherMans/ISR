@@ -1,6 +1,7 @@
 from math import sqrt
 
 import numpy as np
+import logging as log
 
 
 def poweig(A, x0, maxiter=100, ztol=1.0e-5, mode=0, teststeps=1):
@@ -127,51 +128,48 @@ def gram_schmidt_qr(mat):
     return q, r
 
 
-def lda(datapoints,threshold = 0.01):
+def lda(datapoints,tarDim = 2):
     '''
-    datapoints is the given data, with shape [class featuredim1 featuredim2]
-    threshold is the percentual treshold for removing the top eigenvalues, usually 0.01, which means that eigenvalues less than 1% 
-    of the overall eigenvalue sum will be removed
+    datapoints is the given data, with shape [classsize samplesize featuredim]
+    tarDim is the amount of eigenvalues which will be kept, meaning the dimension, which will be 
+    transferred to
     '''
-    cl,m,n = datapoints.shape
-    mean_vectors=np.zeros((cl,m))
+    cl,samplesize,featuresize = datapoints.shape
+    mean_vectors=[]
     for i in range(cl):
-        mean_vectors[i] = np.mean(datapoints[i], axis=0)
-#         print('Mean Vector class %s: %s\n' % (i,mean_vectors[i]))
+        mean_vectors.append(np.mean(datapoints[i],axis=0))
+#         print('Mean Vector class %s: %s\samplesize' % (i,mean_vectors[i]))
 #     Calcuate Within Scatter matrix:
-    s_w = np.zeros((m,n))
+    mean_vectors = np.array(mean_vectors)
+    s_w = np.zeros((featuresize,featuresize))
+    
     for i in range(cl):
         curmat = datapoints[i]
         for row in curmat:
-#             Get the current col
-            col = row.reshape(n,1)
-            meancol = mean_vectors[i].reshape(n,1)
+#             Get the current row, transform to col just for dot product purpose
+            col = row.reshape(featuresize,1)
+            meancol = mean_vectors[i].reshape(featuresize,1)
             s_w += (col-meancol).dot((col-meancol).T)
 #         print ('Within class covaricance Scatter : ',s_w[i])
     overall_mean = np.mean(mean_vectors, axis=0)
-    s_b = np.zeros((m,n))
+    s_b = np.zeros((featuresize,featuresize))
     for i in range(cl):
         samp_size = len(datapoints[i])
-        mean_row = mean_vectors[i].reshape(n,1)
+        mean_row = mean_vectors[i].reshape(featuresize,1)
         s_b += samp_size*(mean_row - overall_mean).dot((mean_row-overall_mean).T)
     
     eig_vals,eig_vecs = np.linalg.eig(np.linalg.inv(s_w).dot(s_b))
-    
     eig_pairs = [(np.abs(eig_vals[i]), eig_vecs[:,i]) for i in range(len(eig_vals))]
     eig_pairs = sorted(eig_pairs,key=lambda k: k[0] ,reverse=True)
-    eigv_sum = sum(eig_vals)
-    maxindexTopVals = -1
-    for i,j in enumerate(eig_pairs):
-        if (j[0]/eigv_sum).real<threshold:
-            maxindexTopVals = i-1 
-            break
-    w= np.hstack(eig_pairs[i][1].reshape(n,1) for i in range(maxindexTopVals))
+    w= np.hstack(eig_pairs[i][1].reshape(featuresize,1) for i in range(tarDim))
+    datapoints = datapoints.reshape(cl*samplesize,featuresize)
+    x_lda = w.T.dot(datapoints.T)
+    x_lda = x_lda.reshape(cl,samplesize)
     
-    print w.T.shape
-    print datapoints.shape
-    print datapoints.reshape(cl*n,m).shape
-    x_lda = w.T.dot(datapoints.reshape(1,cl*n,m)).T
-    print x_lda.shape
+    log.debug("XLDA Dim {0}".format(x_lda.shape))
+    return x_lda
+    
+    
 def eigdecomposition(mat):
     row, col = mat.shape
     eigenvalues = np.zeros(row)
