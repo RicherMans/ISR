@@ -19,7 +19,7 @@ def main():
     datapoints = np.random.multivariate_normal(means,variances,size=(2,10000)).T
 #     datapoints= datapoints.reshape(2,150,4)
     log.debug("Inital datapoints shape:{0}".format(datapoints.shape))
-    for datap,color in zip(datapoints,('red','blue','black','yellow','green')):
+    for datap,color in zip(datapoints,('red','blue','green')):
         plt.scatter(datap[:,0],datap[:,1],marker='+',c=color)
 #     log.info("x:",x)
 #     plt.plot(x,y,'x'); 
@@ -28,18 +28,17 @@ def main():
     ldaproj= decompositions.lda(datapoints,1)
     
     datapoints = datapoints.reshape(samp*cl,feat)
-    y = np.array(cl*samp)
-    for i in range(cl):
-        y.append([i]*samp)
+    y = []
+    for i in range(cl*samp):
+        y.append(i/samp)
     ldask = sklearn.lda.LDA(1)
-    ret = ldask.fit(datapoints,y)
-    print ret
+    ret = ldask.fit(datapoints,y).transform(datapoints)
+    ret = ret.reshape(cl,samp)
+#     TODO: Change target
     for i,marker,color in zip(
-        range(dims),('^','+','o','q','u'),('red','blue','black','yellow','green')):
-        minval = min(ldaproj[i])
-        maxval = max(ldaproj[i])
-        print minval,maxval
-        plt.scatter(ldaproj[i],np.zeros_like(ldaproj[i]),color=color,alpha=0.5,marker=marker)
+        range(dims),('^','+','o'),('red','blue','green')):
+        plt.scatter(ldaproj[i],np.ones_like(ldaproj[i]),color=color,alpha=0.5,marker=marker)
+        plt.scatter(ret[i], np.zeros_like(ret[i]), c=color)
 #         plt.plot(ldaproj[i],np.zeros_like(ldaproj[i]),color=color,alpha=0.5)
 #         plt.scatter(x=ldaproj[0],
 #                 y=ldaproj[1],
