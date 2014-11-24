@@ -37,8 +37,8 @@ def main():
 #     TODO: Change target
     for i,marker,color in zip(
         range(dims),('^','+','o'),('red','blue','green')):
-        plt.scatter(ldaproj[i],np.ones_like(ldaproj[i]),color=color,alpha=0.5,marker=marker)
-        plt.scatter(ret[i], np.zeros_like(ret[i]), c=color)
+        plt.scatter(ldaproj[i],np.full_like(ldaproj[i],3),color=color,alpha=0.5,marker=marker)
+#         plt.scatter(ret[i], np.zeros_like(ret[i]), c=color)
 #         plt.plot(ldaproj[i],np.zeros_like(ldaproj[i]),color=color,alpha=0.5)
 #         plt.scatter(x=ldaproj[0],
 #                 y=ldaproj[1],
