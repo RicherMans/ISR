@@ -20,6 +20,9 @@ In the field of speech recognition, the input consists of raw waveforms, which w
 
 \section{Motivation}
 
+The motivation for this Project comes from the real world application of feature extraction and speech Processing. Nowadays the amount of data for training any kinds of models is extremely large ( hundreds of Gigabytes), so that one needs to extract only the meaningful information out of the data. This process is called feature extraction and results in a vectorized representation of the data. Using these feature vectors, we can train a model, which goal it is to classify a certain behaviour. This final model can then be post-processed by LDA to increase the distances between the classes. 
+LDA is a general post-processing tool in speaker recognition. In this Report we show how LDA can also be used by using the power iteration instead of the more general QR-Decomposition.
+
 \section{Linear Discriminative Analysis}
 %Blabla basisc about LDA
 
@@ -46,7 +49,12 @@ The clue of the whole algorithm is then to use the most important $m, m< n$ eige
 \mathbf{y} = \mathbf{W}^T \mathbf{x}
 \end{align*}
 
-A large eigenvalue means that the corresponding eigenvector has also large values, which means that this eigenvector encompass most of the variance of the given class. This means we can simply sort the eigenvalues in descending order and pick the largest $m$ out.
+A large eigenvalue means that the corresponding eigenvector has also large values, which means that this eigenvector encompass most of the variance of the given class. This means we can simply sort the eigenvalues in descending order and pick the largest $m$ eigenvalues out. Doing so allows us to reduce the dimensionality of the given data, by removing the less important parts.
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.4]{LDA.png}
+\caption{Using LDA to increase inner class distance in case of constant covariance }
+\end{figure}
 
 Here we want to point out that there exist many different algorithms for computing the eigenvalues, whereas we have focused in this Report in the Power iteration. 
 
@@ -72,7 +80,9 @@ It needs to said that $b_k$ converges to a multiple of the eigenvector $\mathbf{
 \section{Experiments}
 
 Generally speaking, when using real speech data, the dimensionality of the feature vectors it too large to efficiently display in any plot.
-Therefore the following experiments are artificial and only show how LDA works. We sampled $n$ Gaussians with feature size of $2$, which will be reduced to $1$ using LDA.
+Therefore the following experiments are artificial and only show how LDA works. We sampled $n$ Gaussians with feature size of $2$, which will be reduced to $1$ dimensional features using LDA.
+
+Moreover we have overall $1000$ samples for all Gaussians.
 
 We used Python2.7 with the help of numpy to do the calculations.
 
@@ -82,7 +92,7 @@ def powerIteration(A):
     b = [random() for i in range(len(A))]
     tmp = [0] * len(A)
 
-    for iteration in range(10000):
+    for iteration in range(1000):
 
         for i in range(0, len(A)):
             tmp[i] = 0
@@ -101,3 +111,17 @@ def powerIteration(A):
 \end{lstlisting}
 
 \section{Results}
+
+First of all we used 3 Gaussians with 2 dimensional features, which we project into 1 dimension:
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.4]{3class_gauss.png}
+\caption{3 Class Gaussian Randomly drawn out of 1000 samples}
+\end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.4]{3class_gauss_proj.png}
+\centering
+\caption{Projection of 3 Class Gaussian into 1 dimensional space}
+\end{figure}
