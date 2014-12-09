@@ -15,8 +15,8 @@ def main():
     dims  = 3
     means = np.random.randint(-10,10,size=(dims))
     variances = np.random.sample(size=(dims,dims))
-#     We sample 2 classes with 10 x,y coordinates each
-    datapoints = np.random.multivariate_normal(means,variances,size=(2,10000)).T
+#     We sample 3 classes with 1000 datapoints
+    datapoints = np.random.multivariate_normal(means,variances,size=(3,4)).T
 #     datapoints= datapoints.reshape(2,150,4)
     log.debug("Inital datapoints shape:{0}".format(datapoints.shape))
     for datap,color in zip(datapoints,('red','blue','green')):
@@ -27,6 +27,7 @@ def main():
     cl,samp,feat = datapoints.shape
     ldaproj= decompositions.lda(datapoints,1)
     
+    print datapoints[0]
     datapoints = datapoints.reshape(samp*cl,feat)
     y = []
     for i in range(cl*samp):
@@ -38,6 +39,7 @@ def main():
     for i,marker,color in zip(
         range(dims),('^','+','o'),('red','blue','green')):
         plt.scatter(ldaproj[i],np.full_like(ldaproj[i],3),color=color,alpha=0.5,marker=marker)
+    print ldaproj[0]
 #         plt.scatter(ret[i], np.zeros_like(ret[i]), c=color)
 #         plt.plot(ldaproj[i],np.zeros_like(ldaproj[i]),color=color,alpha=0.5)
 #         plt.scatter(x=ldaproj[0],
