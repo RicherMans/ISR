@@ -8,20 +8,11 @@ import subprocess
 import re
 import multiprocessing as mp
 from functools import partial
-<<<<<<< HEAD
 import itertools
-=======
-import time
-# try:
-#     sys.path.append('/slfs1/users/hedi7/utils/PYSGE')
-# except:
-#     print "No PYSGE found, cluster run support is removed"
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
 
 HTKTOOLSPATH = '/slfs1/users/yl710/htk/HTKTools/'
 
 
-<<<<<<< HEAD
 ###
 # Attention:
 # All static variables which end with _DIR will be created by this script.
@@ -34,12 +25,6 @@ HTKTOOLSPATH = '/slfs1/users/yl710/htk/HTKTools/'
 MASK = '%%%%%%%%%%%%%%*'
 
 QSUB = 'qsub'
-=======
-# The masked using to determinate which features will be used to perform normalization
-# This mask represents a normalization for every utterance
-MASK = "%%%%%%%%%%%%%%*"
-
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
 
 ROOT_DIR = '.'
 VAD_PATH = '/slfs1/users/hedi7/utils/FeatureExtract/vad/'
@@ -60,11 +45,7 @@ VAD_GMM_MMF = os.path.join(VAD_PATH, 'MMF')
 FEATURES_DIR = os.path.join(ROOT_DIR, 'features')
 STATIC_DIR = os.path.join(FEATURES_DIR, 'static')
 DYNAMIC_DIR = os.path.join(FEATURES_DIR, 'concat')
-<<<<<<< HEAD
 CMVN_DIR = os.path.join(FEATURES_DIR, 'cmvn')
-=======
-CMVN_FEATURES = os.path.join(FEATURES_DIR, 'cmvn')
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
 
 LOG_DIR = os.path.join(ROOT_DIR, 'log')
 TMP_DIR = os.path.join(ROOT_DIR, 'tmp')
@@ -74,7 +55,6 @@ VARSCALEDIR = os.path.join(TMP_DIR, 'cvn')
 FLIST_DIR = os.path.join(CONFIG_DIR, 'flists')
 EDFILES_DIR = os.path.join(CONFIG_DIR, 'edfiles')
 
-<<<<<<< HEAD
 MLF_HEADER = '#!MLF!#'
 
 NUMBER_JOBS = 20
@@ -142,8 +122,6 @@ RUN_MODE = {
 
 global runner
 
-=======
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
 
 def pprint(str, silent):
     if not silent:
@@ -198,7 +176,6 @@ def generate_HCopy_script(files, output_features, output_script, featuretype=r'p
             output.write(os.linesep)
 
 
-<<<<<<< HEAD
 def splitintochunks(l, num):
     a = []
     spl, ext = divmod(len(l), num)
@@ -210,33 +187,14 @@ def splitintochunks(l, num):
     return a
 
 
-=======
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
 def splitScp(scpfile, chunksize=None):
     '''
     Splits the given scp file and returns a list of the new paths
     '''
-<<<<<<< HEAD
     scplines = open(scpfile, 'r').read().splitlines()
     chunks = []
     if not chunksize:
         chunks = splitintochunks(scplines, NUMBER_JOBS)
-=======
-    def splitintochunks(l, num):
-        a = []
-        spl, ext = divmod(len(l), num)
-        for i in range(num):
-            a.append(l[i * spl:(i + 1) * spl])
-        # If he have a residual, we append the last entries into the last list
-        if ext:
-            a[-1].extend(l[-ext:])
-        return a
-
-    scplines = open(scpfile, 'r').read().splitlines()
-    chunks = []
-    if not chunksize:
-        chunks = splitintochunks(scplines, mp.cpu_count())
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
     else:
         chunks = splitintochunks(scplines, chunksize)
     tardir = os.path.abspath(os.path.dirname(scpfile))
@@ -253,7 +211,6 @@ def splitScp(scpfile, chunksize=None):
     return newfilepaths
 
 
-<<<<<<< HEAD
 # def multiprocessHCopy(scpfiles, config):
 #     '''
 #     Runs HCopy in multiple processes
@@ -298,24 +255,6 @@ def writeOutSplits(splits, outputdir, outputname):
 
 def HCopy(config, hcopy_scp):
 
-=======
-def multiprocessHCopy(scpfiles, config):
-    '''
-    Runs HCopy in multiple processes
-    '''
-    part = partial(HCopy, config)
-
-    threadpool = mp.Pool()
-    ts = time.time()
-    threadpool.map(part, scpfiles)
-    te = time.time()
-    print "Multi : %.2f" % (te - ts)
-    threadpool.close()
-    threadpool.join()
-
-
-def HCopy(config, hcopy_scp):
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
     args = []
     args.append(HCOPY)  # HCopy binary
     args.extend(r'-T 1'.split())
@@ -323,18 +262,10 @@ def HCopy(config, hcopy_scp):
     args.extend(r'-C {}'.format(os.path.join(config)).split())
     args.extend(r'-S {}'.format(hcopy_scp).split())  # Script file
 
-<<<<<<< HEAD
     return args
     # with open(os.path.join(LOG_DIR, 'hcopy_{}.log'.format(stage)), mode='w') as log:
     #     subprocess.check_call(
     #         args,  stdout=log, stderr=subprocess.STDOUT)
-=======
-    stage = os.path.basename(os.path.splitext(hcopy_scp)[0])
-
-    with open(os.path.join(LOG_DIR, 'hcopy_{}.log'.format(stage)), mode='w') as log:
-        subprocess.check_call(
-            args,  stdout=log, stderr=subprocess.STDOUT)
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
 
 
 def generate_HCompV_script(input_dir, output_script, featuretype='plp'):
@@ -392,7 +323,6 @@ def HCompV(train, config, readdir=None, floor=None, proto=None, mask=None, hmmfl
     if clusterdir:
         args.extend('-c {}'.format(clusterdir).split())
     args.extend('-S {}'.format(train).split())  # List of training files (mfcc)
-<<<<<<< HEAD
 
     return args
     # global runner
@@ -400,11 +330,6 @@ def HCompV(train, config, readdir=None, floor=None, proto=None, mask=None, hmmfl
     # reason
     # runner(args, logfile=os.path.abspath(os.path.join(
     #     LOG_DIR, 'hcompv_{}.log'.format(trainname))))
-=======
-    trainname = os.path.splitext(os.path.basename(train))[0]
-    with open(os.path.join(LOG_DIR, 'hcompv_{}.log'.format(trainname)), mode='w') as log:
-        subprocess.Popen(args, stdout=log).wait()
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
 
 
 def concatenateSpeech(vadmlf, featuretype='plp'):
@@ -412,17 +337,11 @@ def concatenateSpeech(vadmlf, featuretype='plp'):
     Generates a file which consists of HCopy Commands to concatenate the speech segments and removing therefore the silenced segments
     vadmlf : the VAD.mlf which was generated using the VAD command
     '''
-<<<<<<< HEAD
     commands = []
     with open(vadmlf, 'r') as lines:
         for line in lines:
             # remove newline
             line = line.rstrip(os.linesep)
-=======
-    running_concats = []
-    with open(vadmlf, 'r') as lines:
-        for line in lines:
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
             # features and labels are indicated as "*/XXXXXXXXXX.lab"
             if line.startswith("\""):
                 # We know that the first 3 characters are "*/, so we remove
@@ -434,14 +353,13 @@ def concatenateSpeech(vadmlf, featuretype='plp'):
                 # Find all speech segments for the current label
                 newline = lines.next()
                 speechsegments = []
-                while re.match("^[0-9]{5,}", newline):
+                while re.match("^[0-9]{1,}", newline):
                     begin, end, segmentflag = newline.split()
                     begin = long(begin) / 100000
                     end = long(end) / 100000
                     if segmentflag == 'speech':
                         speechsegments.append((begin, end))
                     newline = lines.next()
-<<<<<<< HEAD
                 # If we have non-silent speech
                 if speechsegments:
                     log = os.path.join(LOG_DIR, 'concat.log')
@@ -472,24 +390,6 @@ def concatenateSpeech(vadmlf, featuretype='plp'):
     #     runner(commandchunk, os.getcwd(), logchunk)
     # for concat in running_concats:
     #     concat.wait()
-=======
-                cmd = []
-                cmd.append(HCOPY)
-                for i in range(len(speechsegments)):
-                    begin, end = speechsegments[i]
-                    cmd.append(
-                        "{}.{}[{},{}]".format(curlabel, featuretype, begin + 1, end - 1))
-                    if i + 1 < len(speechsegments):
-                        cmd.extend("+")
-                featurename = curlabel + '.' + featuretype
-                cmd.append(
-                    os.path.abspath(os.path.join(DYNAMIC_DIR, featurename)))
-                running_concats.append(
-                    subprocess.Popen(cmd, cwd=os.path.abspath(
-                        STATIC_DIR)))
-    for concat in running_concats:
-        concat.wait()
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
 
 
 def writeSimpleScp(files, outputpath):
@@ -499,7 +399,6 @@ def writeSimpleScp(files, outputpath):
             scppointer.write(os.linesep)
 
 
-<<<<<<< HEAD
 def parallelVad(scpfile, outputmlf):
     # Generate one "base" .scp file which will then be split up
     scpsplits = splitScp(scpfile)
@@ -557,25 +456,12 @@ def vad(scpfile, outputmlf):
     # writeSimpleScp(wavfiles, scpfile)
     args = []
     # outputmlf = os.path.abspath(outputmlf)
-=======
-def vad(wavfiles, outputdir):
-    '''
-    wavfiles: the absolute filepaths to the given wave files
-    outputdir : directory where the concatenated and silence removed features will be stored
-    '''
-    # Generate the .scp file
-    scpfile = os.path.abspath(os.path.join(TMP_DIR, 'vad.scp'))
-    writeSimpleScp(wavfiles, scpfile)
-    args = []
-    resultMLF = os.path.abspath(os.path.join(TMP_DIR, 'vad.mlf'))
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
     # WE need to use everywhere an absolute path , since we will run the .vad in
     # it's directory, meaning that every realtive link will fail
     args.append(VAD)
     args.append(scpfile)
     args.append(VAD_GMM_CFG)
     args.append(VAD_GMM_MMF)
-<<<<<<< HEAD
     args.append(os.path.abspath(outputmlf))
     # For the VAD tool we need to run it in the given folder otherwise ./HList
     # will not be found, so we use cwd = "" to do so
@@ -585,15 +471,6 @@ def vad(wavfiles, outputdir):
     # with open(os.path.join(LOG_DIR, 'vad.log'), 'w') as log:
     #     subprocess.Popen(
     #         args, stdout=log, stderr=subprocess.STDOUT, cwd=VAD_PATH).wait()
-=======
-    args.append(resultMLF)
-    # For the VAD tool we need to run it in the given folder otherwise ./HList
-    # will not be found, so we use cwd = "" to do so
-    with open(os.path.join(LOG_DIR, 'vad.log'), 'w') as log:
-        subprocess.Popen(
-            args, stdout=log, stderr=subprocess.STDOUT, cwd=VAD_PATH).wait()
-    return resultMLF
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
 
 
 def readFeatureConfig(config):
@@ -717,21 +594,15 @@ def cmvn(cutcfg, cmncfg, cvncfg):
     cvncfg: Path to the cvn config file
     returns path to the resulting .scp file
     '''
-<<<<<<< HEAD
     global runner
     concat_features = readDir(DYNAMIC_DIR)
     norm_script = os.path.abspath(
         os.path.join(TMP_DIR, '{}.scp'.format('norm')))
-=======
-    concat_features = readDir(DYNAMIC_DIR)
-    norm_script = os.path.join(TMP_DIR, '{}.scp'.format('norm'))
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
     data_scp = os.path.join(TMP_DIR, '{}.scp'.format('data'))
     # Write out the general data file
     writeSimpleScp(concat_features, data_scp)
     # And the HCopy file
 
-<<<<<<< HEAD
     generate_HCopy_script(concat_features, CMVN_DIR, norm_script)
     # Run first the cmn HCOMPV
     # The mask needs to be with ABSPATH otherwise it wouldn't work since
@@ -774,28 +645,11 @@ def cmvn(cutcfg, cmncfg, cvncfg):
     # runner([args], os.getcwd(), [logfile])
 
     cmnv_features = readDir(CMVN_DIR)
-=======
-    generate_HCopy_script(concat_features, CMVN_FEATURES, norm_script)
-    # Run first the cmn HCOMPV
-    FEATUREMASK = os.path.join(os.path.abspath(DYNAMIC_DIR), MASK)
-    # Mean normalization
-    HCompV(data_scp, cmncfg, mask=FEATUREMASK,
-           clusterrequest='m', clusterdir=CMEANDIR)
-    # variance normalization
-    HCompV(data_scp, cvncfg, mask=FEATUREMASK,
-           clusterrequest='v', clusterdir=VARSCALEDIR)
-    normsplits = splitScp(norm_script)
-    multiprocessHCopy(normsplits, cutcfg)
-    # HCopy(cutcfg,norm_script)
-
-    cmnv_features = readDir(CMVN_FEATURES)
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
     cmnv_scp = os.path.join(TMP_DIR, 'cmvn.scp')
     writeSimpleScp(cmnv_features, cmnv_scp)
     return cmnv_scp
 
 
-<<<<<<< HEAD
 def extractstaticFeatures(wavfiles, configpath):
     '''
     wavfiles : list of the wavfiles which will be processed
@@ -824,8 +678,6 @@ def audio_scp_type(value):
     else:
         return readDir(value)
 
-=======
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
 if __name__ == "__main__":
     """
         Feature extraction script
@@ -834,13 +686,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Feature extraction using multiple processes on the machine'
                                      )
 
-<<<<<<< HEAD
     parser.add_argument('sourceAudio',
                         type=audio_scp_type, help='The root directory of all .wav files or an already feature extracted .scp file')
-=======
-    parser.add_argument('rootaudiodir',
-                        type=str, help='The root directory of all .wav files')
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
     parser.add_argument(
         '-c', '--config', dest='config', type=argparse.FileType('r'), help='HTK Config file for the feature exraction', required=True
     )
@@ -856,14 +703,11 @@ if __name__ == "__main__":
                         help='Cleanup the generated files after processing'
                         )
 
-<<<<<<< HEAD
     parser.add_argument(
         '--run', help='runs on either Cluster or locally the extraction job', default='local')
     parser.add_argument(
         '--vadmlf', type=str, help='If Vad was already done, mlf file can be provided, so that vad will not be run')
 
-=======
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
     args = parser.parse_args()
 
     ### Step 0 - Setup the Working Directories ###
@@ -871,12 +715,9 @@ if __name__ == "__main__":
     pprint('Setup the Working Directories', args.silent)
     create_dirs()
 
-<<<<<<< HEAD
     global runner
     runner = RUN_MODE[args.run]
 
-=======
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
     pprint('Reading in Config ', args.silent)
     config = readFeatureConfig(args.config)
     # Check if the given features are compatible
@@ -893,30 +734,13 @@ if __name__ == "__main__":
 
     ### Step 1 - Extract the Static Features ###
 
-<<<<<<< HEAD
     wavfiles = args.sourceAudio
 
-    extractstaticFeatures(wavfiles, configpath)
-=======
-    pprint('Extracting the features', args.silent)
-
-    wavfiles = readDir(args.rootaudiodir)
-
-    hcopy_scp = os.path.join(TMP_DIR, '{}.scp'.format('static'))
-    # Extracting the static features
-    generate_HCopy_script(wavfiles, STATIC_DIR, hcopy_scp)
-    scpsplits = splitScp(hcopy_scp)
-    multiprocessHCopy(scpsplits, configpath)
-    ts = time.time()
-    HCopy(configpath, hcopy_scp)
-    te = time.time()
-    print "Single : %2.f" % (te - ts)
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
+    # extractstaticFeatures(wavfiles, configpath)
 
     ### Step 2 - VAD ###
 
     pprint('Running VAD', args.silent)
-<<<<<<< HEAD
     if args.vadmlf:
         vadmlf = args.vadmlf
     else:
@@ -927,10 +751,6 @@ if __name__ == "__main__":
 
     # vadmlf = os.path.join(ROOT_DIR, 'vad_spoof.mlf')
 
-=======
-    vadmlf = vad(wavfiles, DYNAMIC_DIR)
-    # vadmlf = os.path.join(TMP_DIR, 'vad.mlf')
->>>>>>> 3640e5f3eef6aab22ade8fa822536eae4ba39b1e
     pprint('Concatinating Frames', args.silent)
     concatenateSpeech(vadmlf)
 
